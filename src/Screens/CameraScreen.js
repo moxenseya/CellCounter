@@ -6,6 +6,7 @@ import {
   Platform,
   Image,
   TouchableOpacity,
+  Animated,
 } from 'react-native';
 import { RNCamera as Camera } from 'react-native-camera';
 import Toast, {DURATION} from 'react-native-easy-toast';
@@ -52,7 +53,6 @@ export default class CameraScreen extends Component {
 
   proceedWithCheckingBlurryImage() {
     const { content, photoPath } = this.state.photoAsBase64;
-
     this.checkForBlurryImage(content).then(blurryPhoto => {
       if (blurryPhoto) {
         this.refs.toast.show('Photo is blurred!',DURATION.FOREVER);
@@ -91,6 +91,7 @@ export default class CameraScreen extends Component {
 
   usePhoto() {
     // do something, e.g. navigate
+    this.refs.toast.show('Photo in use!',DURATION.FOREVER);
   }
 
 
@@ -128,8 +129,14 @@ export default class CameraScreen extends Component {
             this.camera = cam;
           }}
           style={styles.preview}
-          permissionDialogTitle={'Permission to use camera'}
-          permissionDialogMessage={'We need your permission to use your camera phone'}
+          //permissionDialogTitle={'Permission to use camera'}
+          //permissionDialogMessage={'We need your permission to use your camera phone'}
+          androidCameraPermissionOptions={{
+            title: 'Permission to use camera',
+            message: 'We need your permission to use your camera',
+            buttonPositive: 'Ok',
+            buttonNegative: 'Cancel',
+          }}
         >
           <View style={styles.takePictureContainer}>
             <TouchableOpacity onPress={this.takePicture}>
