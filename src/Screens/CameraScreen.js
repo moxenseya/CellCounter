@@ -20,8 +20,8 @@ export default class CameraScreen extends Component {
     super(props);
 
     this.takePicture = this.takePicture.bind(this);
-    this.checkForBlurryImage = this.checkForBlurryImage.bind(this);
-    this.proceedWithCheckingBlurryImage = this.proceedWithCheckingBlurryImage.bind(this);
+    this.checkForBlurryImage = this.countCells.bind(this);
+    this.proceedWithCheckingBlurryImage = this.proceedWithCountCells.bind(this);
     this.repeatPhoto = this.repeatPhoto.bind(this);
     this.usePhoto = this.usePhoto.bind(this);
   }
@@ -35,31 +35,36 @@ export default class CameraScreen extends Component {
     },
   };
 
-  checkForBlurryImage(imageAsBase64) {
+  countCells(imageAsBase64) {
     return new Promise((resolve, reject) => {
       if (Platform.OS === 'android') {
-        OpenCV.checkForBlurryImage(imageAsBase64, error => {
+        OpenCV.countCells(imageAsBase64, error => {
           // error handling
         }, msg => {
           resolve(msg);
         });
       } else {
-        OpenCV.checkForBlurryImage(imageAsBase64, (error, dataArray) => {
+        OpenCV.countCells(imageAsBase64, (error, dataArray) => {
           resolve(dataArray[0]);
         });
       }
     });
   }
 
-  proceedWithCheckingBlurryImage() {
+  proceedWithCountCells() {
     const { content, photoPath } = this.state.photoAsBase64;
-    this.checkForBlurryImage(content).then(blurryPhoto => {
-      if (blurryPhoto) {
-        this.refs.toast.show('Photo is blurred!',DURATION.FOREVER);
-        return this.repeatPhoto();
-      }
-      this.refs.toast.show('Photo is clear!', DURATION.FOREVER);
+    this.countCells(content).then(cellCount => {
+      // if (blurryPhoto) {
+      //   this.refs.toast.show(blurryPhoto,DURATION.FOREVER);
+      //   return this.repeatPhoto();
+      //   //this.setState({ photoAsBase64: { ...this.state.photoAsBase64, isPhotoPreview: true, photoPath } });
+      // }
+      // this.refs.toast.show('Photo cool!', DURATION.FOREVER);
+      // this.setState({ photoAsBase64: { ...this.state.photoAsBase64, isPhotoPreview: true, photoPath } });
+
       this.setState({ photoAsBase64: { ...this.state.photoAsBase64, isPhotoPreview: true, photoPath } });
+      this.refs.toast.show(cellCount,DURATION.FOREVER);
+
     }).catch(err => {
       console.log('err', err)
     });
@@ -73,7 +78,7 @@ export default class CameraScreen extends Component {
         ...this.state,
         photoAsBase64: { content: data.base64, isPhotoPreview: false, photoPath: data.uri },
       });
-      this.proceedWithCheckingBlurryImage();
+      this.proceedWithCountCells();
     }
   }
 

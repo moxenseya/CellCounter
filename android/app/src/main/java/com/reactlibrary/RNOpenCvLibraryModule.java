@@ -9,12 +9,19 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 
 import org.opencv.core.CvType;
+import org.opencv.core.KeyPoint;
 import org.opencv.core.Mat;
 
 import org.opencv.android.Utils;
+import org.opencv.core.MatOfKeyPoint;
+import org.opencv.features2d.FastFeatureDetector;
+import org.opencv.features2d.Params;
+import org.opencv.features2d.SimpleBlobDetector;
 import org.opencv.imgproc.Imgproc;
 
 import android.util.Base64;
+
+import java.lang.reflect.Array;
 
 public class RNOpenCvLibraryModule extends ReactContextBaseJavaModule {
 
@@ -79,4 +86,44 @@ public class RNOpenCvLibraryModule extends ReactContextBaseJavaModule {
             errorCallback.invoke(e.getMessage());
         }
     }
+
+    @ReactMethod
+    public void countCells(String imageAsBase64, Callback errorCallback, Callback successCallback) {
+        try {
+            BitmapFactory.Options options = new BitmapFactory.Options();
+            options.inDither = true;
+            options.inPreferredConfig = Bitmap.Config.ARGB_8888;
+
+            byte[] decodedString = Base64.decode(imageAsBase64, Base64.DEFAULT);
+            Bitmap image = BitmapFactory.decodeByteArray(decodedString, 0, decodedString.length);
+
+
+//      Bitmap image = decodeSampledBitmapFromFile(imageurl, 2000, 2000);
+            int l = CvType.CV_8UC1; //8-bit grey scale image
+            Mat matImage = new Mat();
+            Utils.bitmapToMat(image, matImage);
+            Mat matImageGrey = new Mat();
+            Imgproc.cvtColor(matImage, matImageGrey, Imgproc.COLOR_BGR2GRAY);
+
+//            Params params = new Params();
+//            params.set_filterByConvexity(true);
+//            params.set_minConvexity(0.2f);
+//            params.set_maxConvexity(1.0f);
+//            params.set_minThreshold(1);
+//            params.set_maxThreshold(255);
+            SimpleBlobDetector detector = SimpleBlobDetector.create();
+
+            MatOfKeyPoint keypoint = new MatOfKeyPoint();
+
+            detector.detect(matImageGrey, keypoint);
+
+
+
+            KeyPoint[] vals = keypoint.toArray();
+            successCallback.invoke( "Cell Count : " + vals.length);
+        } catch (Exception e) {
+            errorCallback.invoke(e.getMessage());
+        }
+    }
+
 }
