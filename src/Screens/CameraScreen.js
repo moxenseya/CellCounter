@@ -15,6 +15,8 @@ import styles from '../Styles/Screens/CameraScreen';
 import OpenCV from '../NativeModules/OpenCV';
 import CircleWithinCircle from '../assets/svg/CircleWithinCircle';
 
+//Check if OpenCV.js can be used here in a function.
+
 export default class CameraScreen extends Component {
   constructor(props) {
     super(props);
